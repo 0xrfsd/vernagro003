@@ -1,4 +1,4 @@
-# vernagro003
+# Vernagro Mobile (iOS/Android)
 
 ### To run the software you must be certified that you have in your computer these dependencies installed
 - NodeJS
