@@ -1,5 +1,6 @@
 # Vernagro Mobile (iOS/Android)
-![auth](https://user-images.githubusercontent.com/64338100/136867260-c58cbbbd-eeef-48fb-a7e8-6a3926079cc2.jpeg)
+![Webp net-resizeimage](https://user-images.githubusercontent.com/64338100/136867435-b09c4c2b-1b11-4569-8be3-93c98bb04184.jpg)
+
 
 ### To run the software you must be certified that you have the following requirements installed.
 - NodeJS (JavaScript runtime).
