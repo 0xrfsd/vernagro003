@@ -3,7 +3,7 @@
 ### To run the software you must be certified that you have the following requirements installed
 - NodeJS (JavaScript runtime)
 
-### To run the software you must be certified that you have the following npm (node package manager) dependencies installed
+### To run the software you must be certified that you have the following npm (node package manager) dependencies globally installed
 - expo-cli (if you don't after installing NodeJS run ```npm install -g expo-cli```
 
 ### After checking the requirements you're able to start
