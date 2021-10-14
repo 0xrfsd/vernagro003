@@ -1,0 +1,43 @@
+[
+  {
+    "id": 0,
+    "estado": "GO",
+    "filiais": [
+      {
+        "id": "6153813b922cba5550b2c800",
+        "estado": "GO",
+        "nome": "Padre Bernardo",
+        "disponivel": true,
+        "valores": {}
+      },
+      {
+        "id": "61538145922cba5550b2c803",
+        "estado": "GO",
+        "nome": "Edeia",
+        "disponivel": true,
+        "valores": {}
+      },
+      {
+        "id": "61543aa813d060ffbc176670",
+        "estado": "GO",
+        "nome": "filial",
+        "disponivel": true,
+        "valores": {}
+      },
+      {
+        "id": "61543c4408b8d422d11c9e33",
+        "estado": "GO",
+        "nome": "Padre",
+        "disponivel": true,
+        "valores": {}
+      },
+      {
+        "id": "61543cc854228dfbe54e1efc",
+        "estado": "GO",
+        "nome": "Filial",
+        "disponivel": true,
+        "valores": {}
+      }
+    ]
+  }
+]

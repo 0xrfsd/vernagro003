@@ -32,8 +32,6 @@ const Selector = ({ estado, id, preco, custo, margem, fili }) => {
       filiais: [],
     };
 
-    const arr = [];
-
     filiais.map((filial) => {
       const Schema = {
         id: filial._id,
@@ -41,9 +39,9 @@ const Selector = ({ estado, id, preco, custo, margem, fili }) => {
         nome: filial.nome,
         disponivel: true,
         valores: {
-          preco: Preco,
-          custo: Custo,
-          margem: Margem,
+          preco: String(Preco),
+          custo: String(Custo),
+          margem: String(Margem),
         },
       };
       model.filiais.push(Schema);
@@ -61,12 +59,12 @@ const Selector = ({ estado, id, preco, custo, margem, fili }) => {
         proxyFiliaisEstado.push(model);
       }
     } else {
-        setFiliaisEstado([]);
-        proxyFiliaisEstado.map((item, id) => {
-            if (item.id === ID) {
-                proxyFiliaisEstado.splice(id, 1)
-            }
-          });
+      setFiliaisEstado([]);
+      proxyFiliaisEstado.map((item, id) => {
+        if (item.id === ID) {
+          proxyFiliaisEstado.splice(id, 1);
+        }
+      });
     }
   }, [Estado, ID, Preco, Custo, Margem, selected]);
 
@@ -88,9 +86,9 @@ const Selector = ({ estado, id, preco, custo, margem, fili }) => {
         key={id}
         style={{
           height: 50,
+          justifyContent: "center",
           width: "100%",
           display: "flex",
-          paddingHorizontal: 10,
         }}
       >
         <View

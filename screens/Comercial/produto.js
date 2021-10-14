@@ -15,7 +15,7 @@ import { useNavigation } from "@react-navigation/core";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import CurrencyInput from "react-native-currency-input";
 
-import { proxyFiliaisEstado } from './selector';
+import { proxyFiliaisEstado } from "./selector";
 import { useSnapshot } from "valtio";
 
 import {
@@ -43,6 +43,8 @@ const Produto = () => {
   const [disponibilidade, setDisponiblidade] = React.useState(false);
   const [valores, setValores] = React.useState(false);
   const [especificacoes, setEspecificacoes] = React.useState(false);
+  const [disponibilidadeEstado, setDisponibilidadeEstado] =
+    React.useState(false);
 
   const [teste, setTeste] = React.useState(false);
 
@@ -79,48 +81,17 @@ const Produto = () => {
     { id: 8, embalagem: "Tonelada", desc: "ton" },
   ];
 
-  // const productSchema = {
-  //   nome: nomedoproduto,
-  //   principio_ativo: principioativo,
-  //   fornecedor: fornecedor,
-  //   embalagem: embalagem,
-  //   quantidade: quantidade,
-  //   disponibilidade: [],
-  // };
-
-  const [ProductSchema, setProductSchema] = React.useState({
-    nome: undefined,
-    principio_ativo: undefined,
-    fornecedor: undefined,
-    embalagem: undefined,
-    quantidade: undefined,
-    disponibilidade: [],
-  });
-
   const [DisponibilidadeSchema, setDisponibilidadeSchema] = React.useState([]);
 
-  const snap = useSnapshot(proxyFiliaisEstado)
+  const snap = useSnapshot(proxyFiliaisEstado);
+
+  const [productSchema, setProductSchema] = React.useState([]);
 
   React.useEffect(() => {
-    setProductSchema({
-      nome: nomedoproduto,
-      principio_ativo: principioativo,
-      fornecedor: fornecedor,
-      embalagem: embalagem,
-      quantidade: quantidade,
-    });
-  }, [
-    nomedoproduto,
-    principioativo,
-    fornecedor,
-    embalagem,
-    quantidade,
-    informacoes,
-    disponibilidade,
-    valores,
-    especificacoes,
-    teste,
-  ]);
+    if (snap.length > 0) {
+      setProductSchema(snap);
+    }
+  }, [snap]);
 
   const [ns, setNs] = React.useState([]);
 
@@ -218,6 +189,10 @@ const Produto = () => {
           onPress={() => {
             if (teste) {
               setTeste(false);
+            }
+            if (disponibilidadeEstado) {
+              setDisponibilidadeEstado(false);
+              setTeste(true);
             }
             if (informacoes) {
               if (informacoesSaved) {
@@ -802,7 +777,7 @@ const Produto = () => {
               disabled={embalagem ? true : false}
               onPress={() => {
                 if (!embalagem) {
-                  setSelecionar(true);
+                  setSelecionar(!selecionar);
                 }
               }}
               style={{
@@ -967,9 +942,20 @@ const Produto = () => {
             contentContainerStyle={{
               alignItems: "center",
               width: Dimensions.get("window").width,
-              padding: 10,
+              paddingHorizontal: 20,
             }}
           >
+            <Text
+              style={{
+                fontSize: 14,
+                margin: 10,
+                width: "100%",
+                color: "#aaa",
+                fontWeight: "bold",
+              }}
+            >
+              Selecione em quais estados esse produto estará disponível
+            </Text>
             {ns.map((newset, id) => {
               return (
                 <Selector
@@ -983,6 +969,26 @@ const Produto = () => {
                 />
               );
             })}
+
+            <TouchableOpacity
+              onPress={() => {
+                setTeste(false);
+                setDisponibilidadeEstado(true);
+              }}
+              style={{ width: "100%" }}
+            >
+              <Text
+                style={{
+                  color: "#aaa",
+                  fontSize: 16,
+                  marginVertical: 5,
+                  textAlign: "right",
+                  textDecorationLine: "underline",
+                }}
+              >
+                Editar disponibilidade por filial
+              </Text>
+            </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => {
@@ -1033,13 +1039,83 @@ const Produto = () => {
                 Salvar especificações
               </Text>
             </TouchableOpacity>
-            {snap.map((filial, id) => {
-              return(
-                <View key={id} style={{ width: '50%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <Text>{id}</Text>
-                  <Text>{filial.id}-{filial.estado}</Text>
-                </View>
-              )
+          </ScrollView>
+        ) : disponibilidadeEstado ? (
+          <ScrollView
+            contentContainerStyle={{
+              alignItems: "center",
+              width: Dimensions.get("window").width,
+            }}
+          >
+            {productSchema.map((filial, id) => {
+              return (
+                <TouchableOpacity
+                  key={id}
+                  style={{
+                    width: "100%",
+                  }}
+                >
+                  <View
+                    style={{
+                      justifyContent: "center",
+                      paddingHorizontal: 10,
+                      height: 40,
+                      backgroundColor: "#eee",
+                    }}
+                  >
+                    <Text>{filial.estado}</Text>
+                  </View>
+                  {filial.filiais.map((filial, id) => {
+                    return (
+                      <View key={id}>
+                        <View
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            padding: 10,
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Text>{filial.nome}</Text>
+                          <Text>
+                            {filial.disponivel === true && "Disponível"}
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            padding: 10,
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <CurrencyInput
+                            placeholder="e.g. R$150,00"
+                            style={{
+                              marginTop: 5,
+                              marginBottom: 10,
+                              paddingVertical: 10,
+                              borderRadius: 5,
+                              borderBottomColor: "#f2f2f2",
+                              borderBottomWidth: 1,
+                            }}
+                            value={filial.valores.preco}
+                            prefix="R$"
+                            delimiter="."
+                            separator=","
+                            precision={2}
+                            minValue={0}
+                            maxValue={99999}
+                            // onChangeText={(e) => console.log(e)}
+                          />
+                          <Text>{filial.valores.custo}</Text>
+                          <Text>{filial.valores.margem}</Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </TouchableOpacity>
+              );
             })}
           </ScrollView>
         ) : (
