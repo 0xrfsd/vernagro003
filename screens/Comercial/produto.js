@@ -64,6 +64,8 @@ const Produto = () => {
   const [disponibilidadeSaved, setDisponibilidadeSaved] = React.useState(false);
   const [valoresSaved, setValoresSaved] = React.useState(false);
   const [especificacoesSaved, setEspecificacoesSaved] = React.useState(false);
+  const [disponibilidadeEstadoSaved, setDisponibilidadeEstadoSaved] =
+    React.useState(false);
 
   const [modal, setModal] = React.useState([]);
 
@@ -86,44 +88,80 @@ const Produto = () => {
   const snap = useSnapshot(proxyFiliaisEstado);
 
   const [productSchema, setProductSchema] = React.useState([]);
+  const [productSchemaUpdate, setProductSchemaUpdate] = React.useState([]);
+
+  const getItemIndex = (arr, item) => {
+    return arr.findIndex((x) => x.id === item);
+  };
+
+  const updateValores = (estadoId, filialId, field, newValue) => {
+    const itemIndex = getItemIndex(productSchema, estadoId);
+
+    let arr = [...productSchema];
+
+    let estado = arr[itemIndex];
+
+    let filial = estado.filiais[filialId];
+
+    if (field === "preco" || field === "custo" || field === "margem") {
+      const valores = { ...filial.valores, [field]: newValue };
+
+      const newFilial = { ...filial, valores };
+
+      arr[itemIndex].filiais[filialId] = newFilial;
+
+      setProductSchemaUpdate(arr);
+    }
+
+    if (field === "disponivel") {
+      let newArr = [];
+
+      if (productSchemaUpdate.length === 0) {
+        newArr = [...productSchema];
+        newArr[itemIndex].filiais[filialId].disponivel =
+          !newArr[itemIndex].filiais[filialId].disponivel;
+      } else {
+        newArr = [...productSchemaUpdate];
+        newArr[itemIndex].filiais[filialId].disponivel =
+          !newArr[itemIndex].filiais[filialId].disponivel;
+      }
+
+      setProductSchemaUpdate(newArr);
+    }
+  };
+
+  const fetchFiliais = async () => {
+    const empresaId = await user.empresaId;
+    const response = await Axios.post(
+      "http://192.168.0.110:9903/api/v0/core/filiais",
+      {
+        empresaId: empresaId,
+      }
+    );
+    await setFili(response.data);
+
+    const estados = await response.data.map((filial, id) => {
+      return filial.estado;
+    });
+
+    const ns = await new Set(estados);
+    const rd = await Array.from(ns);
+    setNs(rd);
+
+    setTeste(true);
+  };
 
   React.useEffect(() => {
     if (snap.length > 0) {
-      setProductSchema(snap);
+      const str = JSON.stringify(snap);
+      const prsd = JSON.parse(str);
+      setProductSchema(prsd);
     }
-  }, [snap]);
+    fetchFiliais();
+    console.log(productSchema);
+  }, [productSchemaUpdate, snap]);
 
   const [ns, setNs] = React.useState([]);
-
-  const produtoss = [
-    {
-      id: 0,
-      nome: "4d",
-      pa: "4d",
-      fornecedor: "generico",
-      pct: "gal",
-      qtd: 25,
-      disponibilidade: [],
-    },
-    {
-      id: 1,
-      nome: "5d",
-      pa: "5d",
-      fornecedor: "generico",
-      pct: "gal",
-      qtd: 25,
-      disponibilidade: [],
-    },
-    {
-      id: 2,
-      nome: "6d",
-      pa: "6d",
-      fornecedor: "generico",
-      pct: "gal",
-      qtd: 25,
-      disponibilidade: [],
-    },
-  ];
 
   const Select = ({ icon, title, description }) => {
     return (
@@ -171,6 +209,59 @@ const Produto = () => {
     );
   };
 
+  const HandleDisponivel = ({ estadoId, filialId, field }) => {
+    const [selected, setSelected] = React.useState(true);
+    React.useLayoutEffect(() => {
+      if (productSchemaUpdate.length === 0) {
+        productSchema[estadoId].filiais[filialId].disponivel === true
+          ? setSelected(true)
+          : setSelected(false);
+      } else {
+        productSchemaUpdate[estadoId].filiais[filialId].disponivel === true
+          ? setSelected(true)
+          : setSelected(false);
+      }
+    }, [productSchemaUpdate, productSchema]);
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          updateValores(estadoId, filialId, field);
+        }}
+        style={{
+          height: 50,
+          justifyContent: "center",
+          width: "100%",
+          display: "flex",
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            paddingVertical: 10,
+          }}
+        >
+          <View
+            style={{
+              height: 25,
+              width: 25,
+              borderRadius: 25,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: selected ? "green" : "transparent",
+              borderWidth: selected ? null : 1,
+              borderColor: selected ? null : "#bbb",
+            }}
+          >
+            {selected ? (
+              <AntDesign name="check" size={15} color="#fff" />
+            ) : null}
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View style={{ flex: 1, width: "100%" }}>
       <View
@@ -187,12 +278,59 @@ const Produto = () => {
       >
         <TouchableOpacity
           onPress={() => {
-            if (teste) {
-              setTeste(false);
-            }
             if (disponibilidadeEstado) {
-              setDisponibilidadeEstado(false);
-              setTeste(true);
+              if (disponibilidadeEstadoSaved) {
+                setDisponibilidadeEstado(false);
+                setDisponiblidade(true);
+              } else {
+                if (productSchemaUpdate.length > 0) {
+                  Alert.alert(
+                    "Tem certeza que deseja voltar?",
+                    "Você perderá tudo que inseriu ao confirmar em voltar",
+                    [
+                      {
+                        text: "Sim",
+                        onPress: () => {
+                          setProductSchemaUpdate([]);
+                        },
+                        style: "destructive",
+                      },
+                      {
+                        text: "Não",
+                        onPress: () => {},
+                      },
+                    ],
+                    { cancelable: false }
+                  );
+                } else {
+                  setDisponibilidadeEstado(false);
+                  setDisponiblidade(true);
+                }
+              }
+            }
+            if (disponibilidade) {
+              if (productSchema.length > 0) {
+                Alert.alert(
+                  "Tem certeza que deseja voltar?",
+                  "Você perderá tudo que inseriu ao confirmar em voltar",
+                  [
+                    {
+                      text: "Sim",
+                      onPress: () => {
+                        setDisponiblidade(false);
+                      },
+                      style: "destructive",
+                    },
+                    {
+                      text: "Não",
+                      onPress: () => {},
+                    },
+                  ],
+                  { cancelable: false }
+                );
+              } else {
+                setDisponiblidade(false);
+              }
             }
             if (informacoes) {
               if (informacoesSaved) {
@@ -297,7 +435,6 @@ const Produto = () => {
                 }
               }
             }
-            disponibilidade && setDisponiblidade(false);
             if (disponibilidade || informacoes || valores || especificacoes) {
               //
             } else {
@@ -329,7 +466,13 @@ const Produto = () => {
                   ],
                   { cancelable: false }
                 );
-              } else {
+              } else if (
+                !informacoes &&
+                !valores &&
+                !especificacoes &&
+                !disponibilidade &&
+                !disponibilidadeEstado
+              ) {
                 navigation.goBack();
               }
             }
@@ -343,116 +486,118 @@ const Produto = () => {
               textDecorationLine: "underline",
             }}
           >
-            {disponibilidade ||
-            informacoes ||
-            valores ||
-            especificacoes ||
-            teste
-              ? "Voltar"
-              : "Fechar"}
+            {!disponibilidade &&
+            !disponibilidadeEstado &&
+            !informacoes &&
+            !valores &&
+            !especificacoes
+              ? "Fechar"
+              : "Voltar"}
           </Text>
         </TouchableOpacity>
         {informacoes || valores || especificacoes || disponibilidade ? (
           <>
-            <TouchableOpacity
-              onPress={() => {
-                if (informacoes) {
-                  if (
-                    nomedoproduto.length > 0 ||
-                    principioativo.length > 0 ||
-                    fornecedor.length > 0
-                  ) {
-                    Alert.alert(
-                      "Tem certeza que deseja redefinir?",
-                      "Você perderá tudo que inseriu ao confirmar em redefinir",
-                      [
-                        {
-                          text: "Sim",
-                          onPress: () => {
-                            setNomedoproduto("");
-                            setPrincipioativo("");
-                            setFornecedor("");
+            {disponibilidade || especificacoes ? null : (
+              <TouchableOpacity
+                onPress={() => {
+                  if (informacoes) {
+                    if (
+                      nomedoproduto.length > 0 ||
+                      principioativo.length > 0 ||
+                      fornecedor.length > 0
+                    ) {
+                      Alert.alert(
+                        "Tem certeza que deseja redefinir?",
+                        "Você perderá tudo que inseriu ao confirmar em redefinir",
+                        [
+                          {
+                            text: "Sim",
+                            onPress: () => {
+                              setNomedoproduto("");
+                              setPrincipioativo("");
+                              setFornecedor("");
+                            },
+                            style: "destructive",
                           },
-                          style: "destructive",
-                        },
-                        {
-                          text: "Não",
-                          onPress: () => {},
-                        },
-                      ],
-                      { cancelable: false }
-                    );
-                  } else {
-                    //
-                  }
-                }
-                if (valores) {
-                  if (
-                    preco != undefined ||
-                    (custo != undefined) | (margem !== undefined)
-                  ) {
-                    Alert.alert(
-                      "Tem certeza que deseja redefinir?",
-                      "Você perderá tudo que inseriu ao confirmar em redefinir",
-                      [
-                        {
-                          text: "Sim",
-                          onPress: () => {
-                            setPreco(undefined);
-                            setCusto(undefined);
-                            setMargem(undefined);
+                          {
+                            text: "Não",
+                            onPress: () => {},
                           },
-                          style: "destructive",
-                        },
-                        {
-                          text: "Não",
-                          onPress: () => {},
-                        },
-                      ],
-                      { cancelable: false }
-                    );
-                  } else {
-                    //
+                        ],
+                        { cancelable: false }
+                      );
+                    } else {
+                      //
+                    }
                   }
-                }
-                if (especificacoes) {
-                  if (embalagem.length > 0) {
-                    Alert.alert(
-                      "Tem certeza que deseja redefinir?",
-                      "Você perderá tudo que inseriu ao confirmar em redefinir",
-                      [
-                        {
-                          text: "Sim",
-                          onPress: () => {
-                            setEmbalagem("");
-                            setQuantidade(undefined);
+                  if (valores) {
+                    if (
+                      preco != undefined ||
+                      (custo != undefined) | (margem !== undefined)
+                    ) {
+                      Alert.alert(
+                        "Tem certeza que deseja redefinir?",
+                        "Você perderá tudo que inseriu ao confirmar em redefinir",
+                        [
+                          {
+                            text: "Sim",
+                            onPress: () => {
+                              setPreco(undefined);
+                              setCusto(undefined);
+                              setMargem(undefined);
+                            },
+                            style: "destructive",
                           },
-                          style: "destructive",
-                        },
-                        {
-                          text: "Não",
-                          onPress: () => {},
-                        },
-                      ],
-                      { cancelable: false }
-                    );
-                  } else {
-                    //
+                          {
+                            text: "Não",
+                            onPress: () => {},
+                          },
+                        ],
+                        { cancelable: false }
+                      );
+                    } else {
+                      //
+                    }
                   }
-                }
-              }}
-            >
-              <Text
-                style={{
-                  color: "#E68202",
-                  fontWeight: "bold",
-                  fontSize: 16,
-                  textDecorationLine: "underline",
+                  if (especificacoes) {
+                    if (embalagem.length > 0) {
+                      Alert.alert(
+                        "Tem certeza que deseja redefinir?",
+                        "Você perderá tudo que inseriu ao confirmar em redefinir",
+                        [
+                          {
+                            text: "Sim",
+                            onPress: () => {
+                              setEmbalagem("");
+                              setQuantidade(undefined);
+                            },
+                            style: "destructive",
+                          },
+                          {
+                            text: "Não",
+                            onPress: () => {},
+                          },
+                        ],
+                        { cancelable: false }
+                      );
+                    } else {
+                      //
+                    }
+                  }
                 }}
               >
-                Redefinir
-              </Text>
-            </TouchableOpacity>
+                <Text
+                  style={{
+                    color: "#E68202",
+                    fontWeight: "bold",
+                    fontSize: 16,
+                    textDecorationLine: "underline",
+                  }}
+                >
+                  Redefinir
+                </Text>
+              </TouchableOpacity>
+            )}
           </>
         ) : null}
       </View>
@@ -592,16 +737,110 @@ const Produto = () => {
             </TouchableOpacity>
           </View>
         ) : disponibilidade ? (
-          <View
-            style={{
-              flex: 1,
-              width: "100%",
-              backgroundColor: "#fff",
-              padding: 20,
+          <ScrollView
+            contentContainerStyle={{
+              alignItems: "center",
+              width: Dimensions.get("window").width,
+              paddingHorizontal: 20,
             }}
           >
-            <Text>Disponibilidade</Text>
-          </View>
+            <Text
+              style={{
+                fontSize: 14,
+                margin: 10,
+                width: "100%",
+                color: "#aaa",
+                fontWeight: "bold",
+              }}
+            >
+              Selecione em quais estados esse produto estará disponível
+            </Text>
+            {ns.map((newset, id) => {
+              return (
+                <Selector
+                  estado={newset}
+                  key={id}
+                  fili={fili}
+                  id={id}
+                  preco={preco}
+                  custo={custo}
+                  margem={margem}
+                />
+              );
+            })}
+
+            <TouchableOpacity
+              onPress={() => {
+                if (productSchema.length > 0) {
+                  setDisponiblidade(false);
+                  setDisponibilidadeEstado(true);
+                }
+              }}
+              style={{ width: "100%" }}
+            >
+              <Text
+                style={{
+                  color: "#aaa",
+                  fontSize: 16,
+                  marginVertical: 5,
+                  textAlign: "right",
+                  textDecorationLine: "underline",
+                }}
+              >
+                Editar disponibilidade por filial
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                if (embalagem.length == 0) {
+                  Alert.alert(
+                    "Não foi possível salvar",
+                    "Por favor insira a embalagem do produto"
+                  );
+                } else if (quantidade == undefined) {
+                  Alert.alert(
+                    "Não foi possível salvar",
+                    "Por favor insira a quantidade da embalagem"
+                  );
+                } else {
+                  Alert.alert(
+                    "Especificaçoes salvas",
+                    "As especificações do seu produto foram salvas com sucesso!",
+                    [
+                      {
+                        text: "Confirmar",
+                        onPress: () => {
+                          setEspecificacoes(false);
+                          setEspecificacoesSaved(true);
+                          setDisponiblidade(true);
+                        },
+                      },
+                    ]
+                  );
+                }
+              }}
+              style={{
+                width: "100%",
+                borderRadius: 5,
+                height: 50,
+                marginTop: 20,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "#E68202",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#fff",
+                  fontSize: 16,
+                  fontWeight: "bold",
+                }}
+              >
+                Salvar especificações
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
         ) : valores ? (
           <View
             style={{
@@ -691,7 +930,7 @@ const Produto = () => {
               delimiter="."
               precision={0}
               separator=","
-              maxValue={100}
+              maxValue={1000}
               minValue={0}
             />
             <TouchableOpacity
@@ -774,11 +1013,8 @@ const Produto = () => {
               Embalagem
             </Text>
             <TouchableOpacity
-              disabled={embalagem ? true : false}
               onPress={() => {
-                if (!embalagem) {
-                  setSelecionar(!selecionar);
-                }
+                setSelecionar(!selecionar);
               }}
               style={{
                 height: "auto",
@@ -804,7 +1040,7 @@ const Produto = () => {
                 color="#bbb"
               />
             </TouchableOpacity>
-            {embalagem ? (
+            {!selecionar ? (
               <>
                 <Text
                   style={{
@@ -937,187 +1173,224 @@ const Produto = () => {
               </>
             )}
           </View>
-        ) : teste ? (
-          <ScrollView
-            contentContainerStyle={{
-              alignItems: "center",
-              width: Dimensions.get("window").width,
-              paddingHorizontal: 20,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 14,
-                margin: 10,
-                width: "100%",
-                color: "#aaa",
-                fontWeight: "bold",
-              }}
-            >
-              Selecione em quais estados esse produto estará disponível
-            </Text>
-            {ns.map((newset, id) => {
-              return (
-                <Selector
-                  estado={newset}
-                  key={id}
-                  fili={fili}
-                  id={id}
-                  preco={preco}
-                  custo={custo}
-                  margem={margem}
-                />
-              );
-            })}
-
-            <TouchableOpacity
-              onPress={() => {
-                setTeste(false);
-                setDisponibilidadeEstado(true);
-              }}
-              style={{ width: "100%" }}
-            >
-              <Text
-                style={{
-                  color: "#aaa",
-                  fontSize: 16,
-                  marginVertical: 5,
-                  textAlign: "right",
-                  textDecorationLine: "underline",
-                }}
-              >
-                Editar disponibilidade por filial
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => {
-                if (embalagem.length == 0) {
-                  Alert.alert(
-                    "Não foi possível salvar",
-                    "Por favor a embalagem do produto"
-                  );
-                } else if (quantidade == undefined) {
-                  Alert.alert(
-                    "Não foi possível salvar",
-                    "Por favor insira a quantidade da embalagem"
-                  );
-                } else {
-                  Alert.alert(
-                    "Especificaçoes salvas",
-                    "As especificações do seu produto foram salvas com sucesso!",
-                    [
-                      {
-                        text: "Confirmar",
-                        onPress: () => {
-                          setEspecificacoes(false);
-                          setEspecificacoesSaved(true);
-                          setDisponiblidade(true);
-                        },
-                      },
-                    ]
-                  );
-                }
-              }}
-              style={{
-                width: "100%",
-                borderRadius: 5,
-                height: 50,
-                marginTop: 20,
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "#E68202",
-              }}
-            >
-              <Text
-                style={{
-                  color: "#fff",
-                  fontSize: 16,
-                  fontWeight: "bold",
-                }}
-              >
-                Salvar especificações
-              </Text>
-            </TouchableOpacity>
-          </ScrollView>
         ) : disponibilidadeEstado ? (
-          <ScrollView
-            contentContainerStyle={{
-              alignItems: "center",
-              width: Dimensions.get("window").width,
-            }}
-          >
-            {productSchema.map((filial, id) => {
-              return (
-                <TouchableOpacity
-                  key={id}
-                  style={{
-                    width: "100%",
-                  }}
-                >
+          <>
+            <ScrollView
+              contentContainerStyle={{
+                paddingBottom: 100,
+                alignItems: "center",
+                width: Dimensions.get("window").width,
+              }}
+            >
+              {productSchema.map((filial, id) => {
+                return (
                   <View
+                    key={id}
                     style={{
-                      justifyContent: "center",
-                      paddingHorizontal: 10,
-                      height: 40,
-                      backgroundColor: "#eee",
+                      width: "100%",
                     }}
                   >
-                    <Text>{filial.estado}</Text>
-                  </View>
-                  {filial.filiais.map((filial, id) => {
-                    return (
-                      <View key={id}>
-                        <View
-                          style={{
-                            display: "flex",
-                            flexDirection: "row",
-                            padding: 10,
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Text>{filial.nome}</Text>
-                          <Text>
-                            {filial.disponivel === true && "Disponível"}
-                          </Text>
-                        </View>
-                        <View
-                          style={{
-                            display: "flex",
-                            flexDirection: "row",
-                            padding: 10,
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <CurrencyInput
-                            placeholder="e.g. R$150,00"
+                    <View
+                      style={{
+                        justifyContent: "center",
+                        paddingHorizontal: 10,
+                        height: 40,
+                        backgroundColor: "#fff",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 18,
+                        }}
+                      >
+                        {filial.estado}
+                      </Text>
+                    </View>
+                    {filial.filiais.map((filial, id) => {
+                      const estadoId = filial.estadoId;
+                      const filialId = filial.id;
+                      return (
+                        <View key={id}>
+                          <View
                             style={{
-                              marginTop: 5,
-                              marginBottom: 10,
-                              paddingVertical: 10,
-                              borderRadius: 5,
-                              borderBottomColor: "#f2f2f2",
-                              borderBottomWidth: 1,
+                              display: "flex",
+                              flexDirection: "row",
+                              padding: 10,
+                              justifyContent: "space-between",
                             }}
-                            value={filial.valores.preco}
-                            prefix="R$"
-                            delimiter="."
-                            separator=","
-                            precision={2}
-                            minValue={0}
-                            maxValue={99999}
-                            // onChangeText={(e) => console.log(e)}
-                          />
-                          <Text>{filial.valores.custo}</Text>
-                          <Text>{filial.valores.margem}</Text>
+                          >
+                            <Text>{filial.nome}</Text>
+                          </View>
+                          <View
+                            style={{
+                              width: "100%",
+                              display: "flex",
+                              flexDirection: "row",
+                              padding: 10,
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <View style={{ width: "30%" }}>
+                              <Text
+                                style={{
+                                  color: "#777",
+                                  fontSize: 14,
+                                  marginVertical: 5,
+                                  textDecorationLine: "underline",
+                                }}
+                              >
+                                Preço
+                              </Text>
+                              <View
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Text style={{ color: "#bbb", fontSize: 16 }}>
+                                  R${" "}
+                                </Text>
+                                <TextInput
+                                  keyboardType="decimal-pad"
+                                  placeholder={`${filial.valores.preco}`}
+                                  onChangeText={(preco) => {
+                                    updateValores(estadoId, id, "preco", preco);
+                                  }}
+                                  style={{
+                                    height: 50,
+                                    fontSize: 16,
+                                    color: "#333",
+                                  }}
+                                />
+                              </View>
+                            </View>
+                            <View style={{ width: "30%" }}>
+                              <Text
+                                style={{
+                                  color: "#777",
+                                  textDecorationLine: "underline",
+                                  fontSize: 14,
+                                  marginVertical: 5,
+                                }}
+                              >
+                                Custo
+                              </Text>
+                              <View
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Text style={{ color: "#bbb", fontSize: 16 }}>
+                                  R${" "}
+                                </Text>
+                                <TextInput
+                                  placeholder={`${filial.valores.custo}`}
+                                  onChangeText={(custo) => {
+                                    updateValores(estadoId, id, "custo", custo);
+                                  }}
+                                  style={{
+                                    height: 50,
+                                    fontSize: 16,
+                                    color: "#333",
+                                  }}
+                                />
+                              </View>
+                            </View>
+                            <View style={{ width: "30%" }}>
+                              <Text
+                                style={{
+                                  color: "#777",
+                                  fontSize: 14,
+                                  textDecorationLine: "underline",
+                                  marginVertical: 5,
+                                }}
+                              >
+                                Margem
+                              </Text>
+                              <View
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Text style={{ color: "#bbb", fontSize: 16 }}>
+                                  R${" "}
+                                </Text>
+                                <TextInput
+                                  placeholder={`${filial.valores.margem}`}
+                                  onChangeText={(margem) => {
+                                    updateValores(
+                                      estadoId,
+                                      id,
+                                      "margem",
+                                      margem
+                                    );
+                                  }}
+                                  style={{
+                                    height: 50,
+                                    fontSize: 16,
+                                    color: "#333",
+                                  }}
+                                />
+                              </View>
+                            </View>
+                            <HandleDisponivel
+                              estadoId={estadoId}
+                              filialId={id}
+                              field={"disponivel"}
+                            />
+                          </View>
                         </View>
-                      </View>
-                    );
-                  })}
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
+                      );
+                    })}
+                  </View>
+                );
+              })}
+            </ScrollView>
+            <View
+              style={{
+                height: "auto",
+                position: "absolute",
+                bottom: 0,
+                backgroundColor: "#fff",
+                paddingHorizontal: 20,
+                paddingBottom: 25,
+                width: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  setDisponibilidadeEstadoSaved(true);
+                }}
+                style={{
+                  width: "100%",
+                  marginHorizontal: 20,
+                  borderRadius: 5,
+                  height: 50,
+                  marginTop: 20,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#E68202",
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontSize: 16,
+                    fontWeight: "bold",
+                  }}
+                >
+                  Salvar novos dados
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </>
         ) : (
           <>
             <Select
@@ -1140,41 +1413,7 @@ const Produto = () => {
               title="Disponibilidade"
               description="Estado e filiais"
             />
-            <TouchableOpacity
-              onPress={() => {
-                const fetchFiliais = async () => {
-                  const empresaId = await user.empresaId;
-                  const response = await Axios.post(
-                    "http://192.168.0.16:9903/api/v0/core/filiais",
-                    {
-                      empresaId: empresaId,
-                    }
-                  );
-                  await setFili(response.data);
-
-                  const estados = await response.data.map((filial, id) => {
-                    return filial.estado;
-                  });
-
-                  const ns = await new Set(estados);
-                  const rd = await Array.from(ns);
-                  setNs(rd);
-
-                  setTeste(true);
-                };
-                fetchFiliais();
-              }}
-              style={{
-                height: 50,
-                width: "100%",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "#333",
-              }}
-            >
-              <Text style={{ color: "#fff" }}>Acessar área de teste</Text>
-            </TouchableOpacity>
-            <View
+            {/* <View
               style={{
                 marginTop: 20,
                 backgroundColor: "#333",
@@ -1213,7 +1452,7 @@ const Produto = () => {
                 Quantiade Kg/L por embalagem:{" "}
                 <Text style={{ color: "#fff" }}>{quantidade}</Text>
               </Text>
-            </View>
+            </View> */}
           </>
         )}
       </View>

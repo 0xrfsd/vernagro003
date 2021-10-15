@@ -2,10 +2,6 @@ import React from "react";
 import { View, Text, Pressable, TouchableOpacity } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { proxy } from "valtio";
-// export const proxyFiliaisEstado = proxy({
-//     estado: undefined,
-//     filiais: [],
-//   });
 
 export const proxyFiliaisEstado = proxy([]);
 
@@ -36,6 +32,7 @@ const Selector = ({ estado, id, preco, custo, margem, fili }) => {
       const Schema = {
         id: filial._id,
         estado: filial.estado,
+        estadoId: ID,
         nome: filial.nome,
         disponivel: true,
         valores: {
