@@ -7,11 +7,12 @@ import Produtos from "../screens/Comercial/produtos";
 import AddFilial from "../screens/Comercial/addFilial";
 import Explorar from "../screens/Comercial/explorar";
 
-import Especificacoes from '../screens/Comercial/especificacoes';
-import Informacoes from '../screens/Comercial/informacoes';
+import Especificacoes from "../screens/Comercial/especificacoes";
+import Informacoes from "../screens/Comercial/informacoes";
 import Valores from "../screens/Comercial/valores";
 import Disponibilidade from "../screens/Comercial/disponibilidade";
 
+import ConsultarProdutos from "../screens/Comercial/consultarProdutos";
 import Produto from "../screens/Comercial/produto";
 
 import { View, Text, Alert, Pressable, TouchableOpacity } from "react-native";
@@ -28,76 +29,6 @@ import { useNavigation } from "@react-navigation/core";
 
 const ComercialTab = createBottomTabNavigator();
 const ComercialStack = createNativeStackNavigator();
-
-const HomeTab = () => {
-  return (
-    <ComercialTab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-
-          if (route.name === "Início") {
-            iconName = focused ? "home" : "home";
-          } else if (route.name === "Pedidos") {
-            iconName = focused ? "archive-sharp" : "archive-sharp";
-          } else if (route.name === "Produtos") {
-            iconName = focused ? "ios-pricetags" : "ios-pricetags";
-          }
-
-          // You can return any component that you like here!
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: "#E68202",
-        tabBarInactiveTintColor: "gray",
-      })}
-    >
-      <ComercialTab.Screen
-        name="Início"
-        options={{ headerShown: false }}
-        component={Comercial}
-      />
-      <ComercialTab.Screen
-        name="Pedidos"
-        options={({ navigation, route }) => ({
-          headerRight: () => (
-            <View style={{ paddingHorizontal: 20 }}>
-              <Pressable
-                style={{
-                  height: "auto",
-                  width: "auto",
-                }}
-              >
-                <AntDesign name="infocirlceo" size={24} color="#0097A7" />
-              </Pressable>
-            </View>
-          ),
-        })}
-        component={Pedidos}
-      />
-      <ComercialTab.Screen
-        name="Produtos"
-        options={({ navigation, route }) => ({
-          headerRight: () => (
-            <View style={{ paddingHorizontal: 20 }}>
-              <Pressable
-                onPress={() => {
-                  navigation.navigate("Modal");
-                }}
-                style={{
-                  height: "auto",
-                  width: "auto",
-                }}
-              >
-                <AntDesign name="plussquareo" size={24} color="#0097A7" />
-              </Pressable>
-            </View>
-          ),
-        })}
-        component={Produtos}
-      />
-    </ComercialTab.Navigator>
-  );
-};
 
 const ComercialRoutes = () => {
   const state = useSnapshot(addFilialState);
@@ -133,7 +64,7 @@ const ComercialRoutes = () => {
     <ComercialStack.Navigator>
       <ComercialStack.Screen
         name="Home"
-        component={HomeTab}
+        component={Comercial}
         options={{ headerShown: false }}
       />
       <ComercialStack.Group screenOptions={{ presentation: "modal" }}>
@@ -141,6 +72,11 @@ const ComercialRoutes = () => {
           name="AddProduto"
           options={{ headerShown: false }}
           component={Produto}
+        />
+        <ComercialStack.Screen
+          name="ConsultarProdutos"
+          component={ConsultarProdutos}
+          options={{ headerShown: false }}
         />
         <ComercialStack.Screen
           name="Explorar"

@@ -20,7 +20,7 @@ import styled from "styled-components/native";
 import AuthContext from "../../context/auth";
 
 const Logo = require("../../assets/logo.png");
-const Fortaleza = require("./fortaleza.png");
+const Fortaleza = require("../../assets/fortaleza.png");
 const Avatar = "https://github.com/ziulev.png";
 
 const Carousel = styled.ScrollView.attrs(() => ({
@@ -47,7 +47,9 @@ const Comercial = () => {
     return (
       <TouchableOpacity
         onPress={() => {
-          title === 'Adicionar produto' ? navigation.navigate('AddProduto') : null
+          title === "Adicionar produto" && navigation.navigate("AddProduto");
+          title === "Consultar produtos" &&
+            navigation.navigate("ConsultarProdutos");
         }}
         style={{
           height: 150,
@@ -120,8 +122,6 @@ const Comercial = () => {
         </View>
       </View>
       <ScrollView style={{ flex: 1 }}>
-      {/* <Text style={{ marginTop: 20, marginLeft: 20, fontSize: 16 }}>Seja muito bem-vindo(a)!</Text>
-      <Text style={{ marginBottom: 20, marginLeft: 20, fontWeight: 'bold', fontSize: 20 }}>{userNome}</Text> */}
         <View
           style={{
             height: "auto",
@@ -147,7 +147,13 @@ const Comercial = () => {
             Referente aos ultimos 7 dias
           </Text>
         </View>
-        <View style={{ paddingLeft: 20, paddingBottom: 20, backgroundColor: "#fff" }}>
+        <View
+          style={{
+            paddingLeft: 20,
+            paddingBottom: 20,
+            backgroundColor: "#fff",
+          }}
+        >
           <Carousel>
             <View
               style={{

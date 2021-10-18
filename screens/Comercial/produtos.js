@@ -33,7 +33,7 @@ const Produtos = () => {
               width: "80%",
               marginTop: 10,
               height: 40,
-              backgroundColor: "#0097A7",
+              backgroundColor: "#E68202",
               justifyContent: "center",
               borderRadius: 5,
               alignItems: "center",
