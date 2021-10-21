@@ -2,36 +2,33 @@ import React from "react";
 import Axios from "axios";
 
 import Comercial from "../screens/Comercial";
-import Pedidos from "../screens/Comercial/pedidos";
-import Produtos from "../screens/Comercial/produtos";
-import AddFilial from "../screens/Comercial/addFilial";
+
 import Explorar from "../screens/Comercial/explorar";
+import Parametros from "../screens/Comercial/parametros";
 
 import Especificacoes from "../screens/Comercial/especificacoes";
 import Informacoes from "../screens/Comercial/informacoes";
 import Valores from "../screens/Comercial/valores";
 import Disponibilidade from "../screens/Comercial/disponibilidade";
 
+import ConsultarPedidos from "../screens/Comercial/consultarPedidos";
 import ConsultarProdutos from "../screens/Comercial/consultarProdutos";
-import Produto from "../screens/Comercial/produto";
+import ConsultarFiliais from "../screens/Comercial/consultarFiliais";
+import ConsultarAgronomos from "../screens/Comercial/consultarAgronomos";
+
+import AddAgronomo from "../screens/Comercial/addAgronomo";
+import AddProduto from "../screens/Comercial/AddProduto";
+import AddFilial from "../screens/Comercial/addFilial";
 
 import { View, Text, Alert, Pressable, TouchableOpacity } from "react-native";
 
-import { useSnapshot } from "valtio";
-
-import { addFilialState } from "../screens/Comercial/addFilial";
-
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/core";
 
-const ComercialTab = createBottomTabNavigator();
 const ComercialStack = createNativeStackNavigator();
 
 const ComercialRoutes = () => {
-  const state = useSnapshot(addFilialState);
   const [error, setError] = React.useState("");
   const navigation = useNavigation();
 
@@ -39,26 +36,6 @@ const ComercialRoutes = () => {
     Alert.alert("Erro", error);
     setError("");
   }
-
-  const handleFilial = async () => {
-    const response = await Axios.post(
-      "http://192.168.0.110:9903/api/v0/core/filial",
-      {
-        empresaId: state.empresaId,
-        nome: state.nome,
-        estado: state.estado,
-      }
-    );
-    if (response.data.status === "Erro!") {
-      setError(response.data.error);
-    }
-    if (response.data === "Filial registrada com sucesso!") {
-      Alert.alert("Registrada", response.data);
-      setTimeout(() => {
-        navigation.goBack();
-      }, 1000);
-    }
-  };
 
   return (
     <ComercialStack.Navigator>
@@ -71,7 +48,22 @@ const ComercialRoutes = () => {
         <ComercialStack.Screen
           name="AddProduto"
           options={{ headerShown: false }}
-          component={Produto}
+          component={AddProduto}
+        />
+        <ComercialStack.Screen
+          name="AddFilial"
+          options={{ headerShown: false }}
+          component={AddFilial}
+        />
+        <ComercialStack.Screen
+          name="AddAgronomo"
+          options={{ headerShown: false }}
+          component={AddAgronomo}
+        />
+        <ComercialStack.Screen
+          name="ConsultarPedidos"
+          component={ConsultarPedidos}
+          options={{ headerShown: false }}
         />
         <ComercialStack.Screen
           name="ConsultarProdutos"
@@ -79,23 +71,24 @@ const ComercialRoutes = () => {
           options={{ headerShown: false }}
         />
         <ComercialStack.Screen
+          name="ConsultarAgronomos"
+          component={ConsultarAgronomos}
+          options={{ headerShown: false }}
+        />
+        <ComercialStack.Screen
+          name="ConsultarFiliais"
+          component={ConsultarFiliais}
+          options={{ headerShown: false }}
+        />
+        <ComercialStack.Screen
+          name="Parametros"
+          component={Parametros}
+          options={{ headerShown: false }}
+        />
+        <ComercialStack.Screen
           name="Explorar"
           component={Explorar}
-          options={({ navigation, route }) => ({
-            headerRight: () => (
-              <View style={{ paddingHorizontal: 0 }}>
-                <Pressable
-                  onPress={() => navigation.goBack()}
-                  style={{
-                    height: "auto",
-                    width: "auto",
-                  }}
-                >
-                  <Text style={{ fontSize: 16, color: "green" }}>Fechar</Text>
-                </Pressable>
-              </View>
-            ),
-          })}
+          options={{ headerShown: false }}
         />
         <ComercialStack.Screen
           name="Informacoes"

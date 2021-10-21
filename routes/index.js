@@ -12,13 +12,13 @@ const Routes = () => {
   const { user, signed } = useContext(AuthContext);
 
   return user ? (
-    user.tipo === "consultor" ? (
+    user.tipo === "Consultor" ? (
       <ConsultorRoutes />
-    ) : user.tipo === "produtor" ? (
+    ) : user.tipo === "Produtor" ? (
       <ProdutorRoutes />
-    ) : user.tipo === "diretor" ? (
+    ) : user.tipo === "Diretor" ? (
       <DiretorRoutes />
-    ) : user.tipo === "comercial" ? (
+    ) : user.tipo === "Comercial" ? (
       <ComercialRoutes />
     ) : null
   ) : (

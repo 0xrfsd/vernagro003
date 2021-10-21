@@ -19,9 +19,12 @@ import styled from "styled-components/native";
 
 import AuthContext from "../../context/auth";
 
+import Avatar from "../../assets/profile.jpg";
+
 const Logo = require("../../assets/logo.png");
 const Fortaleza = require("../../assets/fortaleza.png");
-const Avatar = "https://github.com/ziulev.png";
+const Avatar1 = "https://github.com/0xrfsd.png";
+const Avatar2 = "https://github.com/dev4dev.png";
 
 const Carousel = styled.ScrollView.attrs(() => ({
   horizontal: true,
@@ -47,7 +50,14 @@ const Comercial = () => {
     return (
       <TouchableOpacity
         onPress={() => {
+          title === "Consultar parâmetros" && navigation.navigate("Parametros");
+          title === "Consultar agronomos" &&
+            navigation.navigate("ConsultarAgronomos");
+          title === "Adicionar agronomo" && navigation.navigate("AddAgronomo");
+          title === "Adicionar filial" && navigation.navigate("AddFilial");
           title === "Adicionar produto" && navigation.navigate("AddProduto");
+          title === "Consultar filiais" &&
+            navigation.navigate("ConsultarFiliais");
           title === "Consultar produtos" &&
             navigation.navigate("ConsultarProdutos");
         }}
@@ -116,7 +126,7 @@ const Comercial = () => {
                 borderWidth: 2,
                 borderColor: "#E68202",
               }}
-              source={{ uri: Avatar }}
+              source={Avatar}
             />
           </TouchableOpacity>
         </View>
@@ -144,7 +154,7 @@ const Comercial = () => {
               color: "#aaa",
             }}
           >
-            Referente aos ultimos 7 dias
+            Esses são os relatórios da sua empresa
           </Text>
         </View>
         <View
@@ -166,11 +176,11 @@ const Comercial = () => {
                 backgroundColor: "#E68202",
               }}
             >
-              <Text style={{ fontWeight: "bold", color: "#fff", fontSize: 33 }}>
-                17
+              <Text style={{ fontWeight: "bold", color: "#fff", fontSize: 30 }}>
+                11
               </Text>
               <Text style={{ marginTop: 5, color: "#fff" }}>
-                Produtos adicionados
+                Pedidos fechados
               </Text>
             </View>
 
@@ -185,11 +195,11 @@ const Comercial = () => {
                 backgroundColor: "#E68202",
               }}
             >
-              <Text style={{ fontWeight: "bold", color: "#fff", fontSize: 33 }}>
-                3
+              <Text style={{ fontWeight: "bold", color: "#fff", fontSize: 30 }}>
+                2
               </Text>
               <Text style={{ marginTop: 5, color: "#fff" }}>
-                Agronomos adicionados
+                Produtos registrados
               </Text>
             </View>
 
@@ -204,19 +214,118 @@ const Comercial = () => {
                 backgroundColor: "#E68202",
               }}
             >
-              <Text style={{ fontWeight: "bold", color: "#fff", fontSize: 33 }}>
+              <Text style={{ fontWeight: "bold", color: "#fff", fontSize: 30 }}>
+                1
+              </Text>
+              <Text style={{ marginTop: 5, color: "#fff" }}>
+                Agronomos registrados
+              </Text>
+            </View>
+
+            <View
+              style={{
+                height: "auto",
+                width: 100,
+                marginRight: 10,
+                padding: 10,
+                justifyContent: "center",
+                borderRadius: 5,
+                backgroundColor: "#E68202",
+              }}
+            >
+              <Text style={{ fontWeight: "bold", color: "#fff", fontSize: 30 }}>
                 7
               </Text>
               <Text style={{ marginTop: 5, color: "#fff" }}>
-                Filiais adicionadas
+                Filiais registradas
               </Text>
             </View>
           </Carousel>
         </View>
 
+        <View style={{ paddingHorizontal: 20, marginVertical: 20 }}>
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: "bold",
+            }}
+          >
+            Pedidos
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              color: "#aaa",
+              marginBottom: 10,
+            }}
+          >
+            Consultar pedidos
+          </Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("ConsultarPedidos")}
+            style={{
+              padding: 20,
+              backgroundColor: "#fff",
+              height: "auto",
+              justifyContent: "space-between",
+              borderRadius: 5,
+              display: "flex",
+              flexDirection: "row",
+              width: "100%",
+            }}
+          >
+            <View style={{ display: "flex", flexDirection: "row" }}>
+              <View
+                style={{
+                  height: 50,
+                  width: 50,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 5,
+                  backgroundColor: "#E68202",
+                }}
+              >
+                <FontAwesome5 name="folder" size={24} color="#fff" />
+              </View>
+              <View style={{ marginLeft: 10, justifyContent: "center" }}>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    width: "100%",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Consultar pedidos
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 12, color: "#aaa", marginTop: 2 }}>
+                  Suprimento
+                </Text>
+              </View>
+            </View>
+            <View style={{ justifyContent: "center" }}>
+              <Text
+                style={{
+                  fontSize: 20,
+                  color: "orange",
+                  fontWeight: "bold",
+                }}
+              >
+                11
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
         <View
           style={{
-            marginTop: 20,
             paddingHorizontal: 20,
             height: "auto",
             width: "100%",
@@ -237,7 +346,7 @@ const Comercial = () => {
               marginBottom: 10,
             }}
           >
-            Adicionar, editar ou remover
+            Adicionar e consultar produtos
           </Text>
           <View
             style={{
@@ -265,43 +374,6 @@ const Comercial = () => {
               fontWeight: "bold",
             }}
           >
-            Filiais
-          </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              color: "#aaa",
-              marginBottom: 10,
-            }}
-          >
-            Adicionar, editar ou remover
-          </Text>
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <Item icon="store-alt" title="Adicionar filial" role="Gerencial" />
-            <Item icon="store-alt" title="Consultar filiais" role="Gerencial" />
-          </View>
-        </View>
-
-        <View
-          style={{
-            marginTop: 20,
-            paddingHorizontal: 20,
-            height: "auto",
-            width: "100%",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: "bold",
-            }}
-          >
             Agronomos
           </Text>
           <Text
@@ -311,7 +383,7 @@ const Comercial = () => {
               marginBottom: 10,
             }}
           >
-            Adicionar, editar ou remover
+            Adicionar e consultar agronomos
           </Text>
           <View
             style={{
@@ -330,6 +402,43 @@ const Comercial = () => {
               title="Consultar agronomos"
               role="Gerencial"
             />
+          </View>
+        </View>
+
+        <View
+          style={{
+            marginTop: 20,
+            paddingHorizontal: 20,
+            height: "auto",
+            width: "100%",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: "bold",
+            }}
+          >
+            Filiais
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              color: "#aaa",
+              marginBottom: 10,
+            }}
+          >
+            Adicionar e consultar filiais
+          </Text>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <Item icon="store-alt" title="Adicionar filial" role="Gerencial" />
+            <Item icon="store-alt" title="Consultar filiais" role="Gerencial" />
           </View>
         </View>
 
@@ -373,7 +482,7 @@ const Comercial = () => {
           </View>
         </View>
 
-        <View style={{ height: 20 }} />
+        <View style={{ height: Platform.OS === "android" ? 20 : 50 }} />
       </ScrollView>
     </>
   );
